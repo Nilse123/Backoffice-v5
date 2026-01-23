@@ -1,0 +1,59 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Custom Colors */
+:root {
+  --color-primary: #030213;
+  --color-primary-dark: #0e8db9;
+  --color-background-light: #f6f8f8;
+  --color-background-dark: #101d22;
+}
+
+/* Body Defaults */
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f6f8f8;
+}
+
+/* Dark mode support */
+html {
+  color-scheme: light dark;
+}
+
+/* Link Defaults */
+a {
+  text-decoration: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f3f4f6;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background-color: #111827;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: #374151;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #4b5563;
+}
