@@ -3,6 +3,7 @@
     <div class="max-w-7xl mx-auto px-6 py-4">
       <!-- Fila única: Logo | Breadcrumbs | Nombre de Usuario -->
       <div class="flex items-center justify-between gap-8">
+        
         <!-- Logo -->
         <img 
           src="https://webservices.griky.co/resources/microsites/portal/griky-academy/img/logo-griky.png" 
@@ -31,7 +32,13 @@
             @click="isDropdownOpen = !isDropdownOpen"
             class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#2a3c42] rounded-lg transition text-sm font-medium text-gray-900 dark:text-white"
           >
-            {{ userName }}
+            <div :class="[
+              'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold',
+              'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+            ]">
+              {{ getInitials(userName) }}
+            </div>
+            <span class="truncate max-w-40">{{ userName }}</span>
             <UIcon 
               name="i-heroicons-chevron-down-20-solid" 
               class="w-4 h-4 transition-transform"
@@ -150,45 +157,56 @@ const breadcrumb = computed(() => {
 // Breadcrumb Parts para renderizado
 const breadcrumbParts = computed(() => {
   const crumbs: Array<{ label: string; href?: string }> = []
-  
+
   const path = route.path
-  
+
   if (path.startsWith('/dashboard/companies')) {
     crumbs.push({ label: 'Dashboard', href: '/dashboard' })
-    
+
     if (path === '/dashboard/companies') {
-      // Si estamos en la lista de compañías, no agregar href
+      // Lista de compañías
       crumbs.push({ label: 'Compañías' })
     } else {
-      // Si estamos en create o edit, agregar href a compañías
+      // Subrutas de compañías
       crumbs.push({ label: 'Compañías', href: '/dashboard/companies' })
-      
-      if (path.startsWith('/dashboard/companies/create')) {
+
+      if (path.includes('/create')) {
         crumbs.push({ label: 'Crear' })
-      } else if (path !== '/dashboard/companies') {
+      } else if (path.includes('/configure')) {
+        // Mostrar "Configuración" en rutas de configuración
+        crumbs.push({ label: 'Configuración' })
+      } else if (path.includes('/accounts')) {
+        crumbs.push({ label: 'Cuentas Asignadas' })
+      } else {
+        // Fallback para editar u otras subrutas
         crumbs.push({ label: 'Editar' })
       }
     }
   } else if (path.startsWith('/dashboard/managers')) {
     crumbs.push({ label: 'Dashboard', href: '/dashboard' })
-    
+
     if (path === '/dashboard/managers') {
-      // Si estamos en la lista de gerentes, no agregar href
+      // Lista de gerentes
       crumbs.push({ label: 'Gerentes' })
     } else {
-      // Si estamos en create o edit, agregar href a gerentes
+      // Subrutas de gerentes
       crumbs.push({ label: 'Gerentes', href: '/dashboard/managers' })
-      
-      if (path.startsWith('/dashboard/managers/create')) {
+
+      if (path.includes('/create')) {
         crumbs.push({ label: 'Crear' })
-      } else if (path !== '/dashboard/managers') {
+      } else if (path.includes('/accounts')) {
+        // Mostrar "Cuentas Asignadas" en la vista de cuentas
+        crumbs.push({ label: 'Cuentas Asignadas' })
+      } else if (path.includes('/configure')) {
+        crumbs.push({ label: 'Configuración' })
+      } else {
         crumbs.push({ label: 'Editar' })
       }
     }
   } else if (path === '/dashboard') {
     crumbs.push({ label: 'Dashboard' })
   }
-  
+
   return crumbs
 })
 
@@ -200,5 +218,16 @@ const handleLogout = () => {
 // Función Atrás
 const goBack = () => {
   router.back()
+}
+
+// Obtener iniciales a partir del nombre (misma lógica que AppTable)
+const getInitials = (name: string) => {
+  if (!name) return ''
+  return name
+    .split(' ')
+    .map(word => word[0] || '')
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 </script>

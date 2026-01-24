@@ -1,177 +1,359 @@
 <template>
-    <div class="max-w-7xl mx-auto">
-        <!-- Header solo con título -->
-        <div class="flex items-center gap-3 mb-2">
-           
-            <h2 class="text-xl font-bold text-[#1a2b3c] dark:text-white">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ title }}</h2>
-            </h2>
-        </div>
+    <div class="max-w-7xl mx-auto space-y-6 bg-white">
+        <!-- Header con buscador y acciones -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-6 py-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+            <!-- Título y estadísticas -->
+            <div class="space-y-1">
+                <h2 class="text-md font-semibold text-gray-900 dark:text-white">
+                    {{ displayedTitle }}
+                </h2>
+                <div class="flex items-center gap-4 text-sm">
+                    <span class="text-gray-500 dark:text-gray-400">
+                        {{ filteredItems.length }} registros
+                    </span>
+                    <span v-if="hasActiveFilter" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs">
+                        <Icon name="heroicons:funnel" class="w-3 h-3" />
+                        Filtro activo
+                    </span>
+                </div>
+            </div>
 
-        <!-- Buscador, Filtro y Botón Agregar en una fila -->
-        <div class="mb-6 mt-4 p-4 rounded-[10px] shadow-[0px_0px_2px_#171a1f14,0px_1px_2.5px_#171a1f12]">
-            <div class="flex items-center gap-3">
-                <!-- Buscador (80% ancho) -->
-                <div class="flex-1" style="max-width: 80%">
-                    <input v-model="searchQuery" type="text" placeholder="Buscar registros..."
-                        class="w-full px-4  h-[36px] rounded-lg border border-gray-200 dark:border-[#2a3c42] bg-white dark:bg-[#1a2c32] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#030213] dark:focus:ring-[#030213]" />
+            <!-- Controles: Buscador, Filtro y Agregar -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <!-- Buscador -->
+                <div class="relative flex-1 sm:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Icon name="heroicons:magnifying-glass" class="w-4 h-4 text-gray-400" />
+                    </div>
+                    <input 
+                        v-model="searchQuery" 
+                        type="text" 
+                        placeholder="Buscar..." 
+                        class="pl-10 pr-4 py-2.5 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-300 focus:border-transparent text-sm transition-all"
+                    />
                 </div>
 
-                <!-- Botón Filtro (solo icono) -->
+                <!-- Filtro -->
                 <div class="relative">
-                    <button @click="isFilterOpen = !isFilterOpen"
-                        class="relative p-2 rounded-lg border border-gray-200 dark:border-[#2a3c42] bg-white dark:bg-[#1a2c32] text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2a3c42] transition flex items-center justify-center">
-                        <Icon name="heroicons:funnel" class="w-5 h-5" />
-                        <span v-if="hasActiveFilter"
-                            class="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-                            1
-                        </span>
+                    <button 
+                        @click="isFilterOpen = !isFilterOpen"
+                        :class="[
+                            'flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-200 text-sm font-medium',
+                            hasActiveFilter 
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30' 
+                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                        ]"
+                    >
+                        <Icon name="heroicons:funnel" class="w-4 h-4" />
+                        <span class="hidden sm:inline">Filtrar</span>
+                        <span v-if="hasActiveFilter" class="ml-1 w-2 h-2 rounded-full bg-blue-500"></span>
                     </button>
 
-                    <!-- Dropdown de Filtro Mejorado -->
-                    <div v-if="isFilterOpen"
-                        class="absolute right-0 mt-2 w-80 bg-white dark:bg-[#1a2c32] border border-gray-200 dark:border-[#2a3c42] rounded-xl shadow-xl z-10">
-                        <!-- Header del Dropdown -->
-                        <div class="px-6 py-4 border-b border-gray-200 dark:border-[#2a3c42]">
-                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Opciones de Filtrado</h3>
+                    <!-- Dropdown de Filtro -->
+                    <div 
+                        v-if="isFilterOpen"
+                        class="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-2xl z-50"
+                    >
+                        <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Filtrar registros</h3>
+                                <button @click="clearFilter" class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                    Limpiar
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Contenido -->
-                        <div class="p-6 space-y-5">
-                            <!-- Campo de Filtro -->
+                        <div class="p-4 space-y-4">
+                            <!-- Campo -->
                             <div>
-                                <label
-                                    class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Campo
                                 </label>
-                                <select v-model="filterField"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2a3c42] bg-white dark:bg-[#252f33] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#030213] text-sm">
-                                    <option value="">Selecciona un campo...</option>
+                                <select 
+                                    v-model="filterField"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-300 text-sm"
+                                >
+                                    <option value="">Todos los campos</option>
                                     <option v-for="header in filterableHeaders" :key="header.key" :value="header.key">
                                         {{ header.label }}
                                     </option>
                                 </select>
                             </div>
 
-                            <!-- Valor de Filtro -->
+                            <!-- Valor -->
                             <div>
-                                <label
-                                    class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
-                                    Valor a buscar
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Contiene
                                 </label>
-                                <input v-model="filterValue" type="text" placeholder="Ej: TechCorp, ejemplo@email.com"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2a3c42] bg-white dark:bg-[#252f33] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#030213] text-sm" />
-                            </div>
-
-                            <!-- Indicador de Filtro Activo -->
-                            <div v-if="hasActiveFilter"
-                                class="px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                                <p class="text-xs text-blue-700 dark:text-blue-300">
-                                    <span class="font-semibold">Filtro activo:</span> {{ filterField ?
-                                    getHeaderLabel(filterField) : 'Campo' }} = "{{ filterValue }}"
-                                </p>
+                                <input 
+                                    v-model="filterValue"
+                                    type="text" 
+                                    placeholder="Ingresa valor..."
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-300 text-sm"
+                                />
                             </div>
                         </div>
 
-                        <!-- Footer con Botones -->
-                        <div class="px-6 py-4 border-t border-gray-200 dark:border-[#2a3c42] flex gap-2">
-                            <button @click="applyFilter"
-                                class="flex-1 px-4 py-2 rounded-lg bg-[#030213] text-white text-sm font-semibold hover:bg-[#050420] transition">
-                                Aplicar Filtro
-                            </button>
-                            <button @click="clearFilter"
-                                class="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-[#2a3c42] text-gray-900 dark:text-white text-sm font-semibold hover:bg-gray-100 dark:hover:bg-[#2a3c42] transition">
-                                Limpiar
+                        <div class="p-4 border-t border-gray-100 dark:border-gray-700">
+                            <button 
+                                @click="applyFilter"
+                                class="w-full py-2.5 px-4 rounded-lg bg-gray-900 dark:bg-gray-700 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors text-sm"
+                            >
+                                Aplicar filtro
                             </button>
                         </div>
                     </div>
-
-                    <!-- Overlay para cerrar el dropdown -->
-                    <div v-if="isFilterOpen" @click="isFilterOpen = false" class="fixed inset-0 z-0" />
                 </div>
 
-                <!-- Botón Agregar (slot) -->
-                <div>
-                    <slot name="header" />
-                </div>
+                <!-- Botón Agregar -->
+                <button 
+                    @click="$emit('add')"
+                    class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors text-sm whitespace-nowrap"
+                >
+                    <Icon name="heroicons:plus" class="w-4 h-4" />
+                    {{ addButtonLabel || 'Agregar' }}
+                </button>
             </div>
         </div>
 
         <!-- Tabla -->
-        <div
-            class="bg-white dark:bg-[#1a2c32] rounded-2xl border border-gray-200 dark:border-[#2a3c42] overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-[#2a3c42] border-b border-gray-200 dark:border-[#3a4c52]">
+                    <thead class="bg-gray-50 dark:bg-gray-900">
                         <tr>
-                            <th v-for="header in headers" :key="header.key"
-                                class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white"
-                                :class="{ 'text-center': header.center }">
-                                {{ header.label }}
+                            <th 
+                                v-for="header in headers" 
+                                :key="header.key"
+                                :class="[
+                                    'px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider',
+                                    { 'text-center': header.center }
+                                ]"
+                            >
+                                <div class="flex items-center gap-2">
+                                    {{ header.label }}
+                                    <button v-if="header.key !== 'actions'" 
+                                            @click="sortBy(header.key)"
+                                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                        <Icon name="heroicons:arrows-up-down" class="w-3 h-3" />
+                                    </button>
+                                </div>
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-[#2a3c42]">
-                        <tr v-for="item in paginatedItems" :key="item.id"
-                            class="hover:bg-gray-50 dark:hover:bg-[#252f33] transition">
-                            <!-- Render dinámico de celdas con slots scoped -->
-                            <td v-for="header in headers" :key="`${item.id}-${header.key}`"
-                                class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400"
-                                :class="{ 'text-center': header.center }">
-                                <!-- Slot scoped para personalizar celdas específicas -->
-                                <slot :name="`cell-${header.key}`" :item="item" :value="item[header.key]">
-                                    <!-- Default: renderizar valor plano -->
-                                    <span :class="{
-                                        'font-medium text-gray-900 dark:text-white': header.key === 'name',
-                                    }">
-                                        {{ item[header.key] }}
-                                    </span>
+                    
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr 
+                            v-for="(item, index) in paginatedItems" 
+                            :key="item.id"
+                            :class="[
+                                'hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors',
+                                index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'
+                            ]"
+                        >
+                            <td 
+                                v-for="header in headers" 
+                                :key="header.key"
+                                :class="[
+                                    'px-6 py-4 text-sm',
+                                    { 'text-center': header.center }
+                                ]"
+                            >
+                                <!-- Acciones -->
+                                <template v-if="header.key === 'actions'">
+                                    <div class="flex items-center gap-1">
+                                           <!-- Botones details - settings -->
+                                        <button 
+                                            v-if="tableType === 'companies'"
+                                            @click="$emit('configure', item)"
+                                            class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            title="Configurar"
+                                        >
+                                            <Icon name="heroicons:cog-6-tooth" class="w-4 h-4" />
+                                        </button>
+                                        <button 
+                                            v-else-if="tableType === 'managers'"
+                                            @click="$emit('configure', item)"
+                                            class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            title="Ver detalles"
+                                        >
+                                            <Icon name="heroicons:eye" class="w-4 h-4" />
+                                        </button>
+                                        <!-- Botones edit - remove -->
+                                        <button 
+                                            @click="$emit('edit', item)"
+                                            class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            title="Editar"
+                                        >
+                                            <Icon name="heroicons:pencil-square" class="w-4 h-4" />
+                                        </button>
+                                        
+                                     
+                                        
+                                        <button 
+                                            @click="$emit('delete', item)"
+                                            class="p-2 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                            title="Eliminar"
+                                        >
+                                            <Icon name="heroicons:trash" class="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- Slot personalizado o valor plano -->
+                                <slot v-else :name="`cell-${header.key}`" :item="item">
+                                    <div class="text-sm text-gray-900 dark:text-gray-300">
+                                        <!-- Para nombres con avatar -->
+                                        <template v-if="header.key === 'name'">
+                                            <div class="flex items-center gap-3">
+                                                <div 
+                                                    :class="[
+                                                        'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold',
+                                                        tableType === 'companies' 
+                                                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                            : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                                                    ]"
+                                                >
+                                                    {{ getInitials(item[header.key]) }}
+                                                </div>
+                                                <div>
+                                                    <div class="font-medium text-gray-900 dark:text-white">
+                                                        {{ item[header.key] }}
+                                                    </div>
+                                                    <div v-if="item.email" class="text-xs text-gray-500 dark:text-gray-400">
+                                                        {{ item.email }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Para estado -->
+                                        <template v-else-if="header.key === 'status' || header.key === 'estado'">
+                                            <span :class="[
+                                                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium',
+                                                getStatusClasses(item[header.key])
+                                            ]">
+                                                <span class="w-1.5 h-1.5 rounded-full"></span>
+                                                {{ item[header.key] }}
+                                            </span>
+                                        </template>
+                                        
+                                        <!-- Para fechas -->
+                                        <template v-else-if="isDateField(header.key)">
+                                            <div class="text-gray-900 dark:text-white">
+                                                {{ formatDate(item[header.key]) }}
+                                            </div>
+                                            <div v-if="isRecent(item[header.key])" class="text-xs text-green-600 dark:text-green-400">
+                                                Reciente
+                                            </div>
+                                        </template>
+                                        
+                                        <!-- Default -->
+                                        <template v-else>
+                                            <span :class="{
+                                                'font-medium text-gray-900 dark:text-white': header.key === 'id' || header.key === 'nombre',
+                                            }">
+                                                {{ item[header.key] }}
+                                            </span>
+                                        </template>
+                                    </div>
                                 </slot>
                             </td>
                         </tr>
-                        <!-- Mensaje cuando no hay resultados -->
+                        
+                        <!-- Estado vacío -->
                         <tr v-if="paginatedItems.length === 0">
-                            <td :colspan="headers.length"
-                                class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                No se encontraron registros
+                            <td :colspan="headers.length" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center justify-center gap-3">
+                                    <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+                                        <Icon name="heroicons:inbox" class="w-8 h-8 text-gray-400" />
+                                    </div>
+                                    <div class="space-y-1">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                            No se encontraron registros
+                                        </p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ hasActiveFilter || searchQuery ? 'Intenta con otros filtros' : 'Agrega un nuevo registro para comenzar' }}
+                                        </p>
+                                    </div>
+                                    <button 
+                                        v-if="!hasActiveFilter && !searchQuery"
+                                        @click="$emit('add')"
+                                        class="mt-2 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
+                                        Crear primer registro
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <!-- Paginación -->
-        <div class="mt-6 flex items-center justify-between">
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-                Mostrando <span class="font-semibold">{{ startIndex + 1 }}</span> a <span class="font-semibold">{{
-                    Math.min(endIndex, filteredItems.length) }}</span> de <span class="font-semibold">{{
-                    filteredItems.length }}</span> registros
-            </div>
-            <div class="flex gap-2">
-                <!-- Botón anterior -->
-                <button @click="previousPage" :disabled="currentPage === 1"
-                    class="px-4 h-[36px] rounded-lg border border-gray-200 dark:border-[#2a3c42] text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2a3c42] transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    Anterior
-                </button>
+            <!-- Paginación  -->
+            <div class="px-6 py-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <!-- Información de registros -->
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Mostrando 
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ Math.min(startIndex + 1, filteredItems.length) }}</span>
+                        -
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ Math.min(endIndex, filteredItems.length) }}</span>
+                        de
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ filteredItems.length }}</span>
+                        registros
+                    </div>
 
-                <!-- Números de página -->
-                <div class="flex gap-1">
-                    <button v-for="page in pageNumbers" :key="page" @click="goToPage(page)" :class="[
-                        'px-3 h-[36px] rounded-lg border text-sm font-medium transition',
-                        currentPage === page
-                            ? 'bg-[#030213] text-white border-[#030213]'
-                            : 'border-gray-200 dark:border-[#2a3c42] text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2a3c42]'
-                    ]">
-                        {{ page }}
-                    </button>
+                    <!-- Controles de paginación -->
+                    <div class="flex items-center gap-2">
+                        <!-- Botón anterior -->
+                        <button 
+                            @click="previousPage" 
+                            :disabled="currentPage === 1"
+                            :class="[
+                                'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all',
+                                currentPage === 1
+                                    ? 'border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            ]"
+                        >
+                            <Icon name="heroicons:chevron-left" class="w-4 h-4" />
+                            <span class="hidden sm:inline">Anterior</span>
+                        </button>
+
+                        <!-- Números de página -->
+                        <div class="flex items-center gap-1">
+                            <button 
+                                v-for="page in pageNumbers" 
+                                :key="page" 
+                                @click="goToPage(page)"
+                                :class="[
+                                    'w-10 h-10 rounded-lg text-sm font-medium transition-all',
+                                    currentPage === page
+                                        ? 'bg-gray-900 dark:bg-gray-700 text-white'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                ]"
+                            >
+                                {{ page }}
+                            </button>
+                        </div>
+
+                        <!-- Botón siguiente -->
+                        <button 
+                            @click="nextPage" 
+                            :disabled="currentPage >= totalPages"
+                            :class="[
+                                'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all',
+                                currentPage >= totalPages
+                                    ? 'border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                    : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            ]"
+                        >
+                            <span class="hidden sm:inline">Siguiente</span>
+                            <Icon name="heroicons:chevron-right" class="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
-
-                <!-- Botón siguiente -->
-                <button @click="nextPage" :disabled="currentPage === totalPages"
-                    class="px-4 h-[36px] rounded-lg border border-gray-200 dark:border-[#2a3c42] text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-[#2a3c42] transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    Siguiente
-                </button>
             </div>
         </div>
     </div>
@@ -191,42 +373,96 @@ interface Item {
     [key: string]: any
 }
 
+// Emits
+const emit = defineEmits<{
+    edit: [item: Item]
+    delete: [item: Item]
+    configure: [item: Item]
+    add: []
+}>()
+
 const props = defineProps<{
-    title: string
     headers: Header[]
     items: Item[]
+    addButtonLabel?: string
+    tableType?: 'companies' | 'managers'
+    title?: string
 }>()
 
 // Estado reactivo
 const searchQuery = ref('')
 const currentPage = ref(1)
-const itemsPerPage = 10
-
-// Estado del filtro
 const isFilterOpen = ref(false)
 const filterField = ref('')
 const filterValue = ref('')
+const sortField = ref('')
+const sortDirection = ref<'asc' | 'desc'>('asc')
+const itemsPerPage = 10
 
-// Headers filtrables (excluir "actions")
+// Helper functions
+const getInitials = (name: string) => {
+    return name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+}
+
+const getStatusClasses = (status: string) => {
+    const statusMap: Record<string, string> = {
+        'Activo': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+        'Inactivo': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+        'Pendiente': 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300',
+        'Completado': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+        'default': 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300'
+    }
+    return statusMap[status] || statusMap.default
+}
+
+const isDateField = (key: string) => {
+    return key.toLowerCase().includes('date') || 
+           key.toLowerCase().includes('fecha') || 
+           key.toLowerCase().includes('creado') ||
+           key.toLowerCase().includes('actualizado')
+}
+
+const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    })
+}
+
+const isRecent = (date: string) => {
+    const diffDays = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24))
+    return diffDays <= 7
+}
+
+// Filtros
 const filterableHeaders = computed(() => {
     return props.headers.filter(header => header.key !== 'actions')
 })
 
-// Indicador de filtro activo
 const hasActiveFilter = computed(() => {
     return filterField.value !== '' && filterValue.value.trim() !== ''
 })
 
-// Helper para obtener el label del campo
 const getHeaderLabel = (key: string) => {
     return props.headers.find(h => h.key === key)?.label || key
 }
 
-// Búsqueda y filtro: filtrar items basado en searchQuery y filtros
+// Título a mostrar: prop `title` tiene prioridad, si no usar fallback según tableType
+const displayedTitle = computed(() => {
+    return props.title ?? (props.tableType === 'companies' ? 'Compañías' : 'Gerentes de Cuentas')
+})
+
+// Búsqueda y filtro
 const filteredItems = computed(() => {
     let result = [...props.items]
 
-    // Aplicar búsqueda
+    // Búsqueda general
     if (searchQuery.value.trim()) {
         const query = searchQuery.value.toLowerCase()
         result = result.filter(item => {
@@ -236,7 +472,7 @@ const filteredItems = computed(() => {
         })
     }
 
-    // Aplicar filtro específico
+    // Filtro específico
     if (filterField.value && filterValue.value.trim()) {
         const fieldValue = filterField.value
         const filterVal = filterValue.value.toLowerCase()
@@ -246,22 +482,42 @@ const filteredItems = computed(() => {
         })
     }
 
+    // Ordenamiento
+    if (sortField.value) {
+        result.sort((a, b) => {
+            const aVal = a[sortField.value]
+            const bVal = b[sortField.value]
+            
+            if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1
+            if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1
+            return 0
+        })
+    }
+
     return result
 })
 
-// Paginación: calcular items para la página actual
+// Método de ordenamiento
+const sortBy = (field: string) => {
+    if (sortField.value === field) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    } else {
+        sortField.value = field
+        sortDirection.value = 'asc'
+    }
+}
+
+// Paginación
 const paginatedItems = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage
     const end = start + itemsPerPage
     return filteredItems.value.slice(start, end)
 })
 
-// Total de páginas
 const totalPages = computed(() => {
     return Math.ceil(filteredItems.value.length / itemsPerPage)
 })
 
-// Índices para mostrar en el footer
 const startIndex = computed(() => {
     return (currentPage.value - 1) * itemsPerPage
 })
@@ -270,7 +526,6 @@ const endIndex = computed(() => {
     return startIndex.value + itemsPerPage
 })
 
-// Números de página para mostrar
 const pageNumbers = computed(() => {
     const pages = []
     const totalPagesToShow = Math.min(5, totalPages.value)
@@ -306,7 +561,7 @@ const goToPage = (page: number) => {
 
 // Métodos del filtro
 const applyFilter = () => {
-    currentPage.value = 1 // Resetear a primera página
+    currentPage.value = 1
     isFilterOpen.value = false
 }
 

@@ -31,6 +31,7 @@ export default {
         'xl': '0.75rem',
         'full': '9999px',
       },
+    
       // Configuración de anchos máximos (max-w-...)
       maxWidth: {
         'xs': '20rem',    // 320px
@@ -49,8 +50,12 @@ export default {
       spacing: {
         '7': '1.75rem',  // Esto habilita px-7, py-7, m-7, w-7, h-7, etc.
         '9': '2.25rem',  // 36px
+         '10': '2.55rem',  // 36px
         '11': '2.75rem', // 44px
-        '13': '3.25rem', // 52px
+         '12.5': '3.125rem', // Exactamente 50px
+               '13': '3.25rem', // 52px
+        '14': '3.5rem',     // 56px
+  
         '15': '3.75rem', // 60px
         '18': '4.5rem',   // 72px
         '20': '5rem',     // 80px

@@ -1,4 +1,3 @@
- <!-- Editar -->
 <template>
   <div class="max-w-2xl mx-auto">
     <!-- Título -->
@@ -52,6 +51,7 @@
 
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
+import { ref } from 'vue'
 
 definePageMeta({
   layout: 'admin'

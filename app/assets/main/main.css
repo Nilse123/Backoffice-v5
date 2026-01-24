@@ -23,8 +23,9 @@ html {
 }
 
 /* Link Defaults */
-a {
+a,button {
   text-decoration: none;
+  cursor: pointer !important;
 }
 
 /* Scrollbar styling */

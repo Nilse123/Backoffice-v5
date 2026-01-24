@@ -4,8 +4,8 @@
       <div v-if="isOpen" class="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-[#1a2c32] rounded-2xl border border-gray-200 dark:border-[#2a3c42] max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <!-- Header -->
-          <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-[#2a3c42]">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ title }}</h2>
+          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-[#2a3c42]">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ title }}</h2>
             <button @click="close" class="p-2 hover:bg-gray-100 dark:hover:bg-[#2a3c42] rounded-lg transition">
               <Icon name="heroicons:x-mark" class="w-6 h-6 text-gray-600 dark:text-gray-400" />
             </button>
