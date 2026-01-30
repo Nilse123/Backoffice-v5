@@ -26,8 +26,10 @@
             'px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition flex items-center gap-2',
             activeTab === tab.id
               ? 'bg-[#030213] text-white'
-              : 'bg-white dark:bg-[#1a2c32] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a3c42] hover:bg-gray-50 dark:hover:bg-[#252f33]'
+              : 'bg-white dark:bg-[#1a2c32] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a3c42] hover:bg-gray-50 dark:hover:bg-[#252f33]',
+            (tab.id === 'contacts' || tab.id === 'contracts') ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
           ]"
+          :disabled="tab.id === 'contacts' || tab.id === 'contracts'"
         >
           <Icon :name="tab.icon" class="w-5 h-5" />
           {{ tab.label }}
@@ -41,7 +43,28 @@
             <Icon name="heroicons:cog-6-tooth" class="w-6 h-6" />
             Servicios Asociados
           </h2>
-          <div class="space-y-6">
+          
+          <!-- Loading State -->
+          <TabLoadingPlaceholder v-if="tabStates.services.isLoading" message="Cargando servicios..." />
+          
+          <!-- Error State -->
+          <TabErrorPlaceholder 
+            v-else-if="tabStates.services.hasError"
+            title="Error al cargar servicios"
+            message="No pudimos cargar la información de servicios. Por favor, intenta nuevamente."
+            @retry="retryLoadTab('services')"
+          />
+          
+          <!-- Empty State -->
+          <TabEmptyPlaceholder 
+            v-else-if="services.length === 0"
+            icon="heroicons:cube"
+            title="Sin servicios configurados"
+            message="No hay servicios disponibles para esta compañía."
+          />
+          
+          <!-- Content -->
+          <div v-else class="space-y-6">
             <div
               v-for="service in services"
               :key="service.id"
@@ -126,7 +149,28 @@
         <!-- Gerentes -->
         <div v-else-if="activeTab === 'managers'">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Gerentes Asociados</h2>
-          <div class="grid gap-4">
+          
+          <!-- Loading State -->
+          <TabLoadingPlaceholder v-if="tabStates.managers.isLoading" message="Cargando gerentes..." />
+          
+          <!-- Error State -->
+          <TabErrorPlaceholder 
+            v-else-if="tabStates.managers.hasError"
+            title="Error al cargar gerentes"
+            message="No pudimos cargar la información de gerentes. Por favor, intenta nuevamente."
+            @retry="retryLoadTab('managers')"
+          />
+          
+          <!-- Empty State -->
+          <TabEmptyPlaceholder 
+            v-else-if="companyManagers.length === 0"
+            icon="heroicons:user-group"
+            title="Sin gerentes asociados"
+            message="No hay gerentes asignados a esta compañía."
+          />
+          
+          <!-- Content -->
+          <div v-else class="grid gap-4">
             <div
               v-for="manager in companyManagers"
               :key="manager.id"
@@ -138,17 +182,33 @@
               </div>
               <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-sm font-medium">{{ manager.phone }}</span>
             </div>
-            <div v-if="companyManagers.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-              No hay gerentes asociados
-            </div>
           </div>
         </div>
 
         <!-- Contactos -->
         <div v-else-if="activeTab === 'contacts'">
-
+          <!-- Loading State -->
+          <TabLoadingPlaceholder v-if="tabStates.contacts.isLoading" message="Cargando contactos..." />
+          
+          <!-- Error State -->
+          <TabErrorPlaceholder 
+            v-else-if="tabStates.contacts.hasError"
+            title="Error al cargar contactos"
+            message="No pudimos cargar la información de contactos. Por favor, intenta nuevamente."
+            @retry="retryLoadTab('contacts')"
+          />
+          
+          <!-- Empty State -->
+          <TabEmptyPlaceholder 
+            v-else-if="companyContacts.length === 0"
+            icon="heroicons:envelope"
+            title="Sin contactos registrados"
+            message="No hay personas de contacto registradas para esta compañía."
+          />
+          
           <!-- AppTable para Contactos -->
           <AppTable 
+            v-else
             title="Personas de Contacto"
             :items="companyContacts"
             :headers="contactTableHeaders"
@@ -167,9 +227,28 @@
 
         <!-- Instancias -->
         <div v-else-if="activeTab === 'instances'">
+          <!-- Loading State -->
+          <TabLoadingPlaceholder v-if="tabStates.instances.isLoading" message="Cargando instancias..." />
+          
+          <!-- Error State -->
+          <TabErrorPlaceholder 
+            v-else-if="tabStates.instances.hasError"
+            title="Error al cargar instancias"
+            message="No pudimos cargar la información de instancias. Por favor, intenta nuevamente."
+            @retry="retryLoadTab('instances')"
+          />
+          
+          <!-- Empty State -->
+          <TabEmptyPlaceholder 
+            v-else-if="companyInstances.length === 0"
+            icon="heroicons:server-stack"
+            title="Sin instancias configuradas"
+            message="No hay instancias registradas para esta compañía."
+          />
 
           <!-- AppTable para Instancias -->
           <AppTable 
+            v-else
             title="Gestión de Instancias"
             :items="companyInstances"
             :headers="instanceTableHeaders"
@@ -197,50 +276,71 @@
             Gestión de Contratos
           </h2>
 
-          <!-- Lista de Contratos Existentes -->
-          <div class="space-y-4 mb-8">
-            <div v-for="contract in companyContracts" :key="contract.id" class="p-6 border border-gray-200 dark:border-[#2a3c42] rounded-lg hover:bg-gray-50 dark:hover:bg-[#252f33] transition">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-2">
-                    <h3 class="text-md font-semibold text-gray-900 dark:text-white">{{ contract.name }}</h3>
-                   
-                  </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">Tipo: {{ contract.type }}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">Sübido: {{ contract.uploadDate }}</p>
-                </div>
-            <div class="flex items-center ">
-  <span :class="['px-3 py-1 rounded-full text-xs font-semibold shrink-0', 
-    contract.status === 'Activo' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 
-    contract.status === 'Firmado' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 
-    'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400']">
-    {{ contract.status }}
-  </span>
+          <!-- Loading State -->
+          <TabLoadingPlaceholder v-if="tabStates.contracts.isLoading" message="Cargando contratos..." />
+          
+          <!-- Error State -->
+          <TabErrorPlaceholder 
+            v-else-if="tabStates.contracts.hasError"
+            title="Error al cargar contratos"
+            message="No pudimos cargar la información de contratos. Por favor, intenta nuevamente."
+            @retry="retryLoadTab('contracts')"
+          />
+          
+          <!-- Content -->
+          <div v-else>
+            <!-- Lista de Contratos Existentes -->
+            <div class="space-y-4 mb-8">
+              <!-- Empty State for Contracts -->
+              <TabEmptyPlaceholder 
+                v-if="companyContracts.length === 0"
+                icon="heroicons:document-text"
+                title="Sin contratos registrados"
+                message="No hay contratos asociados a esta compañía."
+              />
+              
+              <!-- Contracts List -->
+              <div v-else class="space-y-4">
+                <div v-for="contract in companyContracts" :key="contract.id" class="p-6 border border-gray-200 dark:border-[#2a3c42] rounded-lg hover:bg-gray-50 dark:hover:bg-[#252f33] transition">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-3 mb-2">
+                        <h3 class="text-md font-semibold text-gray-900 dark:text-white">{{ contract.name }}</h3>
+                       
+                      </div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Tipo: {{ contract.type }}</p>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Sübido: {{ contract.uploadDate }}</p>
+                    </div>
+                <div class="flex items-center ">
+      <span :class="['px-3 py-1 rounded-full text-xs font-semibold shrink-0', 
+        contract.status === 'Activo' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 
+        contract.status === 'Firmado' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 
+        'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400']">
+        {{ contract.status }}
+      </span>
 
-  <button @click="handleDownloadContract(contract.id)" class="px-4 py-2 text-gray-900 dark:text-white font-semibold hover:bg-gray-200 dark:hover:bg-[#2a3c42] rounded-lg transition whitespace-nowrap">
-    Descargar
-  </button>
-</div>
+      <button @click="handleDownloadContract(contract.id)" class="px-4 py-2 text-gray-900 dark:text-white font-semibold hover:bg-gray-200 dark:hover:bg-[#2a3c42] rounded-lg transition whitespace-nowrap">
+        Descargar
+      </button>
+    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div v-if="companyContracts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-              No hay contratos registrados
-            </div>
-          </div>
 
-          <!-- Formulario para Subir Nuevo Contrato -->
-          <div class="bg-white dark:bg-[#1a2c32] rounded-lg border border-gray-200 dark:border-[#2a3c42] p-8">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Subir Nuevo Contrato</h3>
-            
-            <form @submit.prevent="handleUploadContract" class="space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Nombre del Contrato -->
-                <div>
-                  <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Nombre del Contrato</label>
-                  <input 
-                    v-model="newContract.name"
-                    type="text" 
-                    placeholder="Ej: Contrato de Servicios 2025" 
+            <!-- Formulario para Subir Nuevo Contrato -->
+            <div class="bg-white dark:bg-[#1a2c32] rounded-lg border border-gray-200 dark:border-[#2a3c42] p-8">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Subir Nuevo Contrato</h3>
+              
+              <form @submit.prevent="handleUploadContract" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Nombre del Contrato -->
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Nombre del Contrato</label>
+                    <input 
+                      v-model="newContract.name"
+                      type="text" 
+                      placeholder="Ej: Contrato de Servicios 2025" 
                     class="w-full px-4 py-2 border border-gray-300 dark:border-[#3a4c52] rounded-lg bg-white dark:bg-[#2a3c42] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-[#030213] outline-none transition"
                     required
                   >
@@ -273,6 +373,7 @@
                 Subir Contrato
               </button>
             </form>
+            </div>
           </div>
         </div>
       </div>
@@ -456,7 +557,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getDetail } from '~/services/company-config'
 
 definePageMeta({
   layout: 'admin'
@@ -558,8 +660,8 @@ const services = ref([
     name: 'POK',
     description: 'Servicio de certificaciones',
     icon: 'heroicons:shield-check',
-    status: 'activo',
-    isActive: true,
+    status: 'inactivo',
+    isActive: false,
     apiToken: '',
     signingKey: '',
     sharedKey: ''
@@ -653,6 +755,126 @@ const contracts = ref([
     fileUrl: '/contratos/nda-2024.pdf'
   }
 ])
+
+// Estado de carga y error para los detalles de la compañía
+import type { Company } from '~/types/company'
+const companyDetail = ref<Company | null>(null)
+const isLoadingDetail = ref(true)
+const hasErrorDetail = ref(false)
+
+// Estados de carga por tab (FE-807)
+const tabStates = ref({
+  services: { isLoading: false, hasError: false },
+  managers: { isLoading: false, hasError: false },
+  contacts: { isLoading: false, hasError: false },
+  instances: { isLoading: false, hasError: false },
+  contracts: { isLoading: false, hasError: false }
+})
+
+// Funciones para manejar reintentos por tab
+const retryLoadTab = async (tabId: string) => {
+  tabStates.value[tabId as keyof typeof tabStates.value].hasError = false
+  tabStates.value[tabId as keyof typeof tabStates.value].isLoading = true
+  try {
+    if (typeof selectedCompanyId.value === 'number') {
+      companyDetail.value = await getDetail(selectedCompanyId.value)
+      await loadTabData(tabId)
+    }
+  } catch (e) {
+    tabStates.value[tabId as keyof typeof tabStates.value].hasError = true
+  } finally {
+    tabStates.value[tabId as keyof typeof tabStates.value].isLoading = false
+  }
+}
+
+// Función auxiliar para cargar datos de una pestaña específica
+const loadTabData = async (tabId: string) => {
+  const tabState = tabStates.value[tabId as keyof typeof tabStates.value]
+  tabState.isLoading = true
+  tabState.hasError = false
+  
+  try {
+    if (tabId === 'services' && companyDetail.value?.featureFlags) {
+      for (const s of services.value) {
+        s.isActive = !!companyDetail.value.featureFlags[s.name]
+      }
+    } else if (tabId === 'contacts' && companyDetail.value?.contacts && companyDetail.value.id) {
+      contacts.value = companyDetail.value.contacts.map(c => ({
+        id: c.id,
+        companyId: companyDetail.value!.id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        position: c.position || '',
+        status: c.position === 'CEO' ? 'Responsable' : 'Contacto'
+      }))
+    } else if (tabId === 'contracts' && companyDetail.value?.contracts && companyDetail.value.id) {
+      contracts.value = companyDetail.value.contracts.map(c => ({
+        id: c.id,
+        companyId: companyDetail.value!.id,
+        name: c.name,
+        type: 'Contrato',
+        status: 'Activo',
+        uploadDate: c.startDate,
+        fileUrl: c.fileUrl || ''
+      }))
+    }
+  } catch (e) {
+    tabState.hasError = true
+  } finally {
+    tabState.isLoading = false
+  }
+}
+
+// Cargar detalles de la compañía al montar
+onMounted(async () => {
+  isLoadingDetail.value = true
+  hasErrorDetail.value = false
+  try {
+    if (typeof selectedCompanyId.value === 'number') {
+      companyDetail.value = await getDetail(selectedCompanyId.value)
+      // Poblar campos del UI desde el backend/mock
+      // Servicios (featureFlags)
+      if (companyDetail.value?.featureFlags) {
+        for (const s of services.value) {
+          s.isActive = !!companyDetail.value.featureFlags[s.name]
+        }
+      }
+      // Contactos
+      if (companyDetail.value?.contacts && companyDetail.value.id) {
+        contacts.value = companyDetail.value.contacts.map(c => ({
+          id: c.id,
+          companyId: companyDetail.value!.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone,
+          position: c.position || '',
+          status: c.position === 'CEO' ? 'Responsable' : 'Contacto'
+        }))
+      } else {
+        contacts.value = []
+      }
+      // Contratos
+      if (companyDetail.value?.contracts && companyDetail.value.id) {
+        contracts.value = companyDetail.value.contracts.map(c => ({
+          id: c.id,
+          companyId: companyDetail.value!.id,
+          name: c.name,
+          type: 'Contrato',
+          status: 'Activo',
+          uploadDate: c.startDate,
+          fileUrl: c.fileUrl || ''
+        }))
+      } else {
+        contracts.value = []
+      }
+    }
+  } catch (e) {
+    hasErrorDetail.value = true
+  } finally {
+    isLoadingDetail.value = false
+  }
+})
 
 // Función para agregar nuevo contacto
 const handleAddContact = () => {

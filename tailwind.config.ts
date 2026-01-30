@@ -50,7 +50,7 @@ export default {
       spacing: {
         '7': '1.75rem',  // Esto habilita px-7, py-7, m-7, w-7, h-7, etc.
         '9': '2.25rem',  // 36px
-         '10': '2.55rem',  // 36px
+         '10git branch -M main ': '2.55rem',  // 36px
         '11': '2.75rem', // 44px
          '12.5': '3.125rem', // Exactamente 50px
                '13': '3.25rem', // 52px

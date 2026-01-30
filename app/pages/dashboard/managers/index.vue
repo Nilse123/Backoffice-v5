@@ -19,7 +19,26 @@
 
     <!-- Contenido Principal -->
     <div>
+      <!-- Loading State -->
+      <div v-if="isLoading && managers.length === 0" class="flex flex-col items-center justify-center py-24">
+        <span class="w-10 h-10 border-4 border-gray-300 border-t-[#030213] rounded-full animate-spin mb-4"></span>
+        <span class="text-gray-700 dark:text-gray-200 text-base font-medium">Cargando gerentes...</span>
+      </div>
+      <!-- Error State -->
+      <div v-else-if="hasError && managers.length === 0" class="flex flex-col items-center justify-center py-24">
+        <Icon name="heroicons:exclamation-triangle" class="w-12 h-12 text-red-500 mb-3" />
+        <span class="text-red-600 dark:text-red-400 text-base font-semibold mb-2">Ocurrió un error al cargar gerentes</span>
+        <button @click="loadManagers" class="px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition">Reintentar</button>
+      </div>
+      <!-- Empty State -->
+      <div v-else-if="!isLoading && managers.length === 0" class="flex flex-col items-center justify-center py-24">
+        <Icon name="heroicons:inbox" class="w-12 h-12 text-gray-400 mb-3" />
+        <span class="text-gray-600 dark:text-gray-400 text-base font-semibold mb-2">No hay gerentes registrados</span>
+        <button @click="openCreateModal" class="px-4 py-2 bg-[#030213] dark:bg-gray-700 text-white rounded-lg hover:bg-[#0a0420] dark:hover:bg-gray-600 transition">Crear el primer gerente</button>
+      </div>
+      <!-- Table State -->
       <AppTable
+        v-else
         :headers="headers"
         :items="managers"
         addButtonLabel="Agregar Gerente"
@@ -31,9 +50,12 @@
       >
         <!-- Celda personalizada para Compañía (con badge) -->
         <template #cell-company="{ item }">
-          <span class="bg-gray-100 dark:bg-[#2a3c42] text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs inline-block">
+          <NuxtLink
+            :to="`/dashboard/companies/configure?id=${item.company}`"
+            class="bg-gray-100 dark:bg-[#2a3c42] text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs inline-block hover:underline cursor-pointer"
+          >
             {{ getCompanyName(item.company) }}
-          </span>
+          </NuxtLink>
         </template>
       </AppTable>
     </div>
@@ -99,26 +121,51 @@
       </div>
     </div>
   </Modal>
+
+  <!-- Modal de Confirmación de Eliminación -->
+  <Modal :is-open="showDeleteModal" title="Confirmar eliminación" @close="cancelDeleteManager">
+    <div class="space-y-4">
+      <p class="text-base text-gray-800 dark:text-white">¿Estás seguro de que deseas eliminar al gerente <span class="font-semibold">{{ managerToDelete?.name }}</span>? Esta acción no se puede deshacer.</p>
+      <div class="flex gap-2 justify-end pt-2">
+        <button @click="cancelDeleteManager" class="px-4 h-9 text-sm font-medium bg-gray-200 dark:bg-[#2a3c42] text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-[#3a4c52] transition">Cancelar</button>
+        <button @click="confirmDeleteManager" class="px-4 h-9 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Eliminar</button>
+      </div>
+    </div>
+  </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+
+import { ref, onMounted } from 'vue'
+import type { Manager } from '~/types/manager'
 import AppTable from '~/components/AppTable.vue'
 import Modal from '~/components/Modal.vue'
-import { useManagers } from '~/composables/useManagers'
+import { list as listManagers, deleteManager } from '~/services/managers'
 import { useSelectedEntity } from '~/composables/useSelectedEntity'
+import { useToast } from '~/composables/useToast'
 
 definePageMeta({
   layout: 'admin'
 })
 
+
 const router = useRouter()
-const { managers, deleteManager, addManager } = useManagers()
 const { setSelectedManagerId } = useSelectedEntity()
+const { showToast } = useToast()
+
+const managers = ref<Manager[]>([])
+const totalManagers = ref(0)
+const page = ref(1)
+const pageSize = ref(3)
+const isLoading = ref(false)
+const hasError = ref(false)
+const search = ref('')
 
 const showModal = ref(false)
 const showCreateModal = ref(false)
+const showDeleteModal = ref(false)
+const managerToDelete = ref(null as any)
 const selectedManager = ref(null as any)
 const newManager = ref({
   name: '',
@@ -150,16 +197,41 @@ const headers = [
 ]
 
 const handleDeleteManager = (manager: any) => {
-  if (confirm(`¿Estás seguro de que quieres eliminar a ${manager.name}?`)) {
-    deleteManager(Number(manager.id))
+  managerToDelete.value = manager
+  showDeleteModal.value = true
+}
+
+const cancelDeleteManager = () => {
+  showDeleteModal.value = false
+  managerToDelete.value = null
+}
+
+const confirmDeleteManager = async () => {
+  if (!managerToDelete.value) return
+  isLoading.value = true
+  try {
+    const ok = await deleteManager(managerToDelete.value.id)
+    if (ok) {
+      await loadManagers()
+      showDeleteModal.value = false
+      managerToDelete.value = null
+      showToast('Gerente eliminado correctamente', 'success')
+    } else {
+      showToast('No se pudo eliminar el gerente (no encontrado)', 'error')
+    }
+  } catch (e) {
+    showToast('Error eliminando el gerente', 'error')
+  } finally {
+    isLoading.value = false
   }
 }
 
+
 const handleSaveManager = () => {
-  // Aquí iría la lógica para guardar los cambios
-  console.log('Guardando gerente:', selectedManager.value)
+  // Aquí iría la lógica para guardar los cambios (mock local)
   showModal.value = false
 }
+
 
 const openCreateModal = () => {
   // Resetear formulario
@@ -172,28 +244,52 @@ const openCreateModal = () => {
   showCreateModal.value = true
 }
 
+
 const handleCreateManager = () => {
   // Validar que los campos no estén vacíos
   if (!newManager.value.name || !newManager.value.email || !newManager.value.phone || !newManager.value.company) {
-    alert('Por favor completa todos los campos')
+    showToast('Por favor completa todos los campos', 'error')
     return
   }
-  
-  // Agregar gerente a la lista
-  addManager({
+  // Simulación de agregar local
+  const newId = Math.max(0, ...managers.value.map((m: any) => m.id)) + 1
+  managers.value.unshift({
+    id: newId,
     name: newManager.value.name,
     email: newManager.value.email,
     phone: newManager.value.phone,
-    company: newManager.value.company
+    company: newManager.value.company,
+    createdAt: new Date().toISOString().split('T')[0] || ''
   })
-  
-  // Cerrar modal
+  totalManagers.value++
   showCreateModal.value = false
+  showToast('Gerente creado correctamente', 'success')
 }
+
 
 const handleDetails = (manager: any) => {
   setSelectedManagerId(manager.id)
-  router.push('/dashboard/managers/accounts')
+  router.push(`/dashboard/managers/accounts`)
 }
+
+// Cargar managers desde el servicio paginado
+const loadManagers = async () => {
+  isLoading.value = true
+  hasError.value = false
+  try {
+    const res = await listManagers({ page: page.value, q: search.value })
+    managers.value = res.items
+    totalManagers.value = res.total
+    pageSize.value = res.pageSize
+  } catch (e) {
+    hasError.value = true
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadManagers()
+})
 </script>
 

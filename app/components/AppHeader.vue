@@ -17,7 +17,7 @@
             <router-link 
               v-if="crumb.href"
               :to="crumb.href"
-              class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition truncate"
+              class="font-medium text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white text-sm transition truncate"
             >
               {{ crumb.label }}
             </router-link>

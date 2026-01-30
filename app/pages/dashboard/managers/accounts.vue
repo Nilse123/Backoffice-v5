@@ -36,7 +36,14 @@
             <!-- Body -->
             <tbody class="divide-y divide-gray-200 dark:divide-[#2a3c42]">
               <tr v-for="account in assignedAccounts" :key="account.id" class="hover:bg-gray-50 dark:hover:bg-[#252f33] transition">
-                <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-300">{{ account.company }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-300">
+                  <NuxtLink
+                    :to="`/dashboard/companies/configure?id=${account.company}`"
+                    class="hover:underline cursor-pointer"
+                  >
+                    {{ account.company }}
+                  </NuxtLink>
+                </td>
                 <td class="px-6 py-4 text-sm">
                   <span :class="[
                     'px-3 py-1 rounded-full text-xs font-semibold',
@@ -53,11 +60,23 @@
                 <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ account.unassignmentDate || '-' }}</td>
                 <td class="px-6 py-4 text-sm">
                   <div class="flex items-center gap-2">
-                    <button class="p-2 hover:bg-gray-200 dark:hover:bg-[#2a3c42] rounded-lg transition" title="Actualizar">
-                      <Icon name="heroicons:arrow-path" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <!-- Botón desasignar -->
+                    <button
+                      class="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition"
+                      title="Desasignar"
+                      @click="handleUnassign(account)"
+                      v-if="!account.unassignmentDate"
+                    >
+                      <Icon name="heroicons:x-mark" class="w-4 h-4 text-red-600 dark:text-red-400" />
                     </button>
-                    <button class="p-2 hover:bg-gray-200 dark:hover:bg-[#2a3c42] rounded-lg transition" title="Agregar">
-                      <Icon name="heroicons:plus" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    <!-- Botón asignar (solo visible si está desasignada) -->
+                    <button
+                      class="p-2 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition"
+                      title="Asignar"
+                      @click="handleAssign(account)"
+                      v-if="account.unassignmentDate"
+                    >
+                      <Icon name="heroicons:plus" class="w-4 h-4 text-green-600 dark:text-green-400" />
                     </button>
                   </div>
                 </td>
@@ -79,6 +98,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useAccounts } from '~/composables/useAccounts'
+import { useManagers } from '~/composables/useManagers'
+import { useSelectedEntity } from '~/composables/useSelectedEntity'
 
 definePageMeta({
   layout: 'admin'
@@ -86,42 +108,29 @@ definePageMeta({
 
 const { managers } = useManagers()
 const { selectedManagerId } = useSelectedEntity()
+const { listByManager, assignToManager, unassignFromManager } = useAccounts()
 
 // Obtener gerente actual
 const manager = computed(() => {
   return managers.value.find(m => m.id === selectedManagerId.value)
 })
 
-// Datos de cuentas asignadas (mock data)
-const assignedAccounts = computed(() => {
-  return [
-    {
-      id: 1,
-      company: 'TechCorp Solutions',
-      status: 'Activa',
-      assignmentDate: '2024-01-15',
-      lastContact: '2024-03-10',
-      contacts: '15 contactos',
-      unassignmentDate: null
-    },
-    {
-      id: 2,
-      company: 'InnovateLab',
-      status: 'Activa',
-      assignmentDate: '2024-02-20',
-      lastContact: '2024-03-12',
-      contacts: '8 contactos',
-      unassignmentDate: null
-    },
-    {
-      id: 3,
-      company: 'GlobalTech Inc',
-      status: 'Inactiva',
-      assignmentDate: '2024-03-01',
-      lastContact: '2024-03-05',
-      contacts: '3 contactos',
-      unassignmentDate: '2024-03-15'
-    }
-  ]
-})
+// Usar accounts.listByManager (mock, retorna todos). Pasamos el ref para mantener reactividad
+const assignedAccounts = listByManager(selectedManagerId)
+
+// Asignar cuenta (mock)
+const handleAssign = async (account: any) => {
+  // TODO: Integrar con backend aquí (POST a {{ACCOUNT_ASSIGNMENTS}})
+  if (typeof selectedManagerId.value === 'number') {
+    await assignToManager(selectedManagerId.value, account)
+  }
+}
+
+// Desasignar cuenta (mock)
+const handleUnassign = async (account: any) => {
+  // TODO: Integrar con backend aquí (DELETE o PATCH a {{ACCOUNT_ASSIGNMENTS}})
+  if (typeof selectedManagerId.value === 'number') {
+    await unassignFromManager(selectedManagerId.value, account.id)
+  }
+}
 </script>

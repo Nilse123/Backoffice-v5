@@ -1,5 +1,17 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Estados de carga/error/empty -->
+    <div v-if="isLoading" class="flex justify-center items-center py-16">
+      <div class="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+    <div v-else-if="errorMsg" class="flex flex-col items-center py-16">
+      <div class="text-red-600 font-semibold mb-2">{{ errorMsg }}</div>
+      <button @click="fetchSummary" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Reintentar</button>
+    </div>
+    <div v-else-if="!summary" class="flex flex-col items-center py-16">
+      <div class="text-gray-500">No hay datos para mostrar</div>
+    </div>
+    <!-- ...existing code... -->
 
     <!-- Header -->
      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
@@ -12,9 +24,9 @@
           </div>
           <!-- Text -->
           <div>
-            <h1 class="text-base md:text-lg font-semibold
+            <h1 class="text-lg font-semibold
                  text-gray-900 dark:text-white leading-tight">
-              Panel de Administración
+           Bienvenido a tu Dashboard
             </h1>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 leading-snug">
               Gestiona compañías y usuarios del sistema
@@ -133,7 +145,7 @@
         <!-- Sección de actividad reciente -->
         <div class="mt-8">
           <div
-            class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            class="bg-linear-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 Actividad Reciente
@@ -189,9 +201,9 @@
         <div class="sticky top-8 space-y-6">
           <!-- Estadísticas generales -->
           <div
-            class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+            class="bg-linear-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-              Resumen Rápido
+              Resumen Histórico
             </h3>
 
             <div class="space-y-4">
@@ -242,7 +254,7 @@
           <hr class="text-gray-200 my-6 py-1">
           <!-- Acciones rápidas -->
           <div
-            class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+            class="bg-linear-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
               Acciones Rápidas
             </h3>
@@ -288,7 +300,7 @@
 
           <!-- Última actualización -->
           <div
-            class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+            class="bg-linear-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center gap-3 mb-3">
               <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 <Icon name="heroicons:information-circle" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -300,8 +312,7 @@
             </div>
             <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
               <p>• Base de datos sincronizada</p>
-              <p>• Backups automáticos activos</p>
-              <p>• SSL certificado vigente</p>
+              <p>• Registro automáticos activos</p>
             </div>
           </div>
         </div>
@@ -311,7 +322,33 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import { dashboardService, type DashboardSummary } from '../../services/dashboard'
+
 definePageMeta({
   layout: 'admin'
 })
+
+const summary = ref<DashboardSummary|null>(null)
+const isLoading = ref(true)
+const errorMsg = ref('')
+
+async function fetchSummary() {
+  isLoading.value = true
+  errorMsg.value = ''
+  try {
+    const data = await dashboardService.getSummary()
+    summary.value = data
+    // Considera vacío si todos los valores son 0
+    if (Object.values(data).every(v => v === 0)) {
+      summary.value = null
+    }
+  } catch (err: any) {
+    errorMsg.value = err?.message || 'Error al cargar el dashboard'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+fetchSummary()
 </script>

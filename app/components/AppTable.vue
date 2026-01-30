@@ -163,40 +163,39 @@
                                 <template v-if="header.key === 'actions'">
                                     <div class="flex items-center gap-1">
                                            <!-- Botones details - settings -->
-                                        <button 
-                                            v-if="tableType === 'companies'"
-                                            @click="$emit('configure', item)"
-                                            class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            title="Configurar"
-                                        >
-                                            <Icon name="heroicons:cog-6-tooth" class="w-4 h-4" />
-                                        </button>
-                                        <button 
-                                            v-else-if="tableType === 'managers'"
-                                            @click="$emit('configure', item)"
-                                            class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            title="Ver detalles"
-                                        >
-                                            <Icon name="heroicons:eye" class="w-4 h-4" />
-                                        </button>
+                                        <AppTooltip text="Configurar" v-if="tableType === 'companies'">
+                                          <button 
+                                              @click="$emit('configure', item)"
+                                              class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                          >
+                                              <Icon name="heroicons:cog-6-tooth" class="w-4 h-4" />
+                                          </button>
+                                        </AppTooltip>
+                                        <AppTooltip text="Ver detalles" v-else-if="tableType === 'managers'">
+                                          <button 
+                                              @click="$emit('configure', item)"
+                                              class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                          >
+                                              <Icon name="heroicons:eye" class="w-4 h-4" />
+                                          </button>
+                                        </AppTooltip>
                                         <!-- Botones edit - remove -->
-                                        <button 
-                                            @click="$emit('edit', item)"
-                                            class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            title="Editar"
-                                        >
-                                            <Icon name="heroicons:pencil-square" class="w-4 h-4" />
-                                        </button>
-                                        
-                                     
-                                        
-                                        <button 
-                                            @click="$emit('delete', item)"
-                                            class="p-2 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                            title="Eliminar"
-                                        >
-                                            <Icon name="heroicons:trash" class="w-4 h-4" />
-                                        </button>
+                                        <AppTooltip text="Editar">
+                                          <button 
+                                              @click="$emit('edit', item)"
+                                              class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                          >
+                                              <Icon name="heroicons:pencil-square" class="w-4 h-4" />
+                                          </button>
+                                        </AppTooltip>
+                                        <AppTooltip text="Eliminar">
+                                          <button 
+                                              @click="$emit('delete', item)"
+                                              class="p-2 rounded-lg text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                          >
+                                              <Icon name="heroicons:trash" class="w-4 h-4" />
+                                          </button>
+                                        </AppTooltip>
                                     </div>
                                 </template>
 
@@ -360,6 +359,7 @@
 </template>
 
 <script setup lang="ts">
+import AppTooltip from './AppTooltip.vue'
 import { computed, ref } from 'vue'
 
 interface Header {
