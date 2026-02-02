@@ -15,24 +15,29 @@
     </div>
 
     <!-- Contenido Principal -->
-    <div class="py-8 bg-white">
+    <div class="py-6 bg-white dark:bg-[#1a2c32]">
       <!-- Pestañas/Botones de Navegación -->
-      <div class="flex gap-3 mb-4 overflow-x-auto pb-4">
+      <div class="flex gap-0 mb-8 overflow-x-auto border-b border-gray-200 dark:border-[#2a3c42]">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           @click="activeTab = tab.id"
           :class="[
-            'px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition flex items-center gap-2',
+            'px-6 py-4 font-medium text-sm whitespace-nowrap transition flex items-center gap-2 relative',
             activeTab === tab.id
-              ? 'bg-[#030213] text-white'
-              : 'bg-white dark:bg-[#1a2c32] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a3c42] hover:bg-gray-50 dark:hover:bg-[#252f33]',
-            (tab.id === 'contacts' || tab.id === 'contracts') ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+              ? 'text-[#030213] dark:text-white'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
+            (tab.id === 'contacts' || tab.id === 'contracts') ? 'opacity-50 cursor-not-allowed' : ''
           ]"
           :disabled="tab.id === 'contacts' || tab.id === 'contracts'"
         >
           <Icon :name="tab.icon" class="w-5 h-5" />
           {{ tab.label }}
+          <!-- Barra subrayada activa -->
+          <span 
+            v-if="activeTab === tab.id"
+            class="absolute bottom-0 left-0 right-0 h-1 bg-gray-700 dark:bg-white rounded-sm"
+          ></span>
         </button>
       </div>
       <!-- Contenido de la Pestaña Activa -->
@@ -137,7 +142,7 @@
                  <div class="flex justify-end w-full">
                 <button 
                   @click="saveServiceConfig(service.id)"
-                  class="w-50 text-sm mt-4 bg-[#030213] hover:bg-[#0a0420] text-white font-medium py-2 rounded-lg transition"
+                  class="w-50 text-sm mt-4 bg-gray-700 hover:bg-[#0a0420] text-white font-medium py-2 rounded-lg transition"
                 >
                   Guardar Configuración
                 </button></div>
@@ -367,7 +372,7 @@
               <!-- Botón Subir -->
               <button 
                 type="submit"
-                class="w-full bg-[#030213] hover:bg-[#0a0420] text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
+                class="w-full bg-gray-700 hover:bg-[#0a0420] text-white font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
               >
                 <Icon name="heroicons:arrow-up-tray" class="w-5 h-5" />
                 Subir Contrato
@@ -446,7 +451,7 @@
           <div class="flex gap-3 pt-4">
             <button 
               type="submit"
-              class="flex-1 bg-[#030213] hover:bg-[#0a0420] text-white font-semibold py-3 px-4 rounded-lg transition"
+              class="flex-1 bg-gray-700 hover:bg-[#0a0420] text-white font-semibold py-3 px-4 rounded-lg transition"
             >
               Crear
             </button>
@@ -538,7 +543,7 @@
           <div class="flex gap-3 pt-4">
             <button 
               type="submit"
-              class="flex-1 bg-[#030213] hover:bg-[#0a0420] text-white font-semibold py-3 px-4 rounded-lg transition"
+              class="flex-1 bg-gray-700 hover:bg-[#0a0420] text-white font-semibold py-3 px-4 rounded-lg transition"
             >
               Crear
             </button>

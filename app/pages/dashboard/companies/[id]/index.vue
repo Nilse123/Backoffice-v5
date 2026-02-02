@@ -32,7 +32,7 @@
 
         <!-- Botones -->
         <div class="flex gap-4 pt-4">
-          <button type="submit" class="flex-1 bg-[#030213] hover:bg-[#0a0420] text-white font-semibold py-3 px-6 rounded-lg transition">
+          <button type="submit" class="flex-1 bg-gray-700 hover:bg-[#0a0420] text-white font-semibold py-3 px-6 rounded-lg transition">
             Guardar Cambios
           </button>
           <NuxtLink to="/dashboard/companies" class="flex-1 bg-gray-200 dark:bg-[#2a3c42] text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-[#3a4c52] font-semibold py-3 px-6 rounded-lg transition text-center">

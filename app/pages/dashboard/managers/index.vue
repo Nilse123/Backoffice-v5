@@ -34,7 +34,7 @@
       <div v-else-if="!isLoading && managers.length === 0" class="flex flex-col items-center justify-center py-24">
         <Icon name="heroicons:inbox" class="w-12 h-12 text-gray-400 mb-3" />
         <span class="text-gray-600 dark:text-gray-400 text-base font-semibold mb-2">No hay gerentes registrados</span>
-        <button @click="openCreateModal" class="px-4 py-2 bg-[#030213] dark:bg-gray-700 text-white rounded-lg hover:bg-[#0a0420] dark:hover:bg-gray-600 transition">Crear el primer gerente</button>
+        <button @click="openCreateModal" class="px-4 py-2 bg-gray-700 dark:bg-gray-700 text-white rounded-lg hover:bg-[#0a0420] dark:hover:bg-gray-600 transition">Crear el primer gerente</button>
       </div>
       <!-- Table State -->
       <AppTable
@@ -86,7 +86,7 @@
       </div>
       <div class="flex gap-2 justify-end pt-4">
         <button @click="showModal = false" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-200 dark:bg-[#2a3c42] text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-[#3a4c52] transition">Cancelar</button>
-        <button @click="handleSaveManager" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-[#030213] text-white rounded-lg hover:bg-[#0a0420] transition">Guardar</button>
+        <button @click="handleSaveManager" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-[#0a0420] transition">Guardar</button>
       </div>
     </div>
   </Modal>
@@ -117,7 +117,7 @@
       </div>
       <div class="flex gap-2 justify-end pt-4">
         <button @click="showCreateModal = false" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-200 dark:bg-[#2a3c42] text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-[#3a4c52] transition">Cancelar</button>
-        <button @click="handleCreateManager" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-[#030213] text-white rounded-lg hover:bg-[#0a0420] transition">Crear Gerente</button>
+        <button @click="handleCreateManager" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-[#0a0420] transition">Crear Gerente</button>
       </div>
     </div>
   </Modal>

@@ -63,7 +63,7 @@
       </div>
       <div class="flex gap-2 justify-end pt-4">
         <button @click="showModal = false" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-200 dark:bg-[#2a3c42] text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-[#3a4c52] transition">Cancelar</button>
-        <button @click="handleSaveCompany" :disabled="isSaving" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-[#030213] text-white rounded-lg hover:bg-[#0a0420] transition">
+        <button @click="handleSaveCompany" :disabled="isSaving" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-[#0a0420] transition">
           <span v-if="isSaving" class="animate-spin mr-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
           Guardar
         </button>
@@ -92,7 +92,7 @@
       </div>
       <div class="flex gap-2 justify-end pt-4">
         <button @click="showCreateModal = false" :disabled="isCreating" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-200 dark:bg-[#2a3c42] text-gray-900 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-[#3a4c52] transition">Cancelar</button>
-        <button @click="handleCreateCompany" :disabled="isCreating" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-[#030213] text-white rounded-lg hover:bg-[#0a0420] transition">
+        <button @click="handleCreateCompany" :disabled="isCreating" class="cursor-pointer flex items-center gap-2 px-4 h-9 text-sm font-medium bg-gray-700 text-white rounded-lg hover:bg-[#0a0420] transition">
           <span v-if="isCreating" class="animate-spin mr-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
           Crear Compañía
         </button>

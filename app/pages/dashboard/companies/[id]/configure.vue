@@ -26,7 +26,7 @@
           :class="[
             'px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition flex items-center gap-2',
             activeTab === tab.id
-              ? 'bg-[#030213] text-white'
+              ? 'bg-gray-700 text-white'
               : 'bg-white dark:bg-[#1a2c32] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2a3c42] hover:bg-gray-50 dark:hover:bg-[#252f33]'
           ]"
         >

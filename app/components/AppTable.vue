@@ -29,7 +29,7 @@
                         v-model="searchQuery" 
                         type="text" 
                         placeholder="Buscar..." 
-                        class="pl-10 pr-4 py-2.5 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-300 focus:border-transparent text-sm transition-all"
+                        class="pl-10 pr-4 py-2 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-800 dark:focus:ring-gray-300 focus:border-transparent text-sm transition-all"
                     />
                 </div>
 
@@ -38,7 +38,7 @@
                     <button 
                         @click="isFilterOpen = !isFilterOpen"
                         :class="[
-                            'flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-200 text-sm font-medium',
+                            'flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 text-sm font-medium',
                             hasActiveFilter 
                                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30' 
                                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -97,7 +97,7 @@
                         <div class="p-4 border-t border-gray-100 dark:border-gray-700">
                             <button 
                                 @click="applyFilter"
-                                class="w-full py-2.5 px-4 rounded-lg bg-gray-900 dark:bg-gray-700 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors text-sm"
+                                class="w-full py-2 px-4 rounded-lg bg-gray-900 dark:bg-gray-700 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors text-sm"
                             >
                                 Aplicar filtro
                             </button>
@@ -108,7 +108,7 @@
                 <!-- Botón Agregar -->
                 <button 
                     @click="$emit('add')"
-                    class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors text-sm whitespace-nowrap"
+                    class="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-700  text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors text-sm whitespace-nowrap"
                 >
                     <Icon name="heroicons:plus" class="w-4 h-4" />
                     {{ addButtonLabel || 'Agregar' }}

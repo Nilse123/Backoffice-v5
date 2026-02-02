@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-7xl mx-auto">
     <!-- Estados de carga/error/empty -->
     <div v-if="isLoading" class="flex justify-center items-center py-16">
       <div class="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
@@ -18,8 +18,8 @@
       <div class="flex-1">
         <div class="flex items-center gap-4">
           <!-- Icon -->
-          <div class="w-12 h-12 bg-[#030213] rounded-xl flex items-center justify-center
-               shadow-sm border border-gray-100 dark:border-gray-700">
+          <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center
+               ">
             <Icon name="heroicons:squares-2x2" class="w-6 h-6 text-white dark:text-gray-300" />
           </div>
           <!-- Text -->
@@ -78,7 +78,7 @@
                 <!-- Footer -->
                 <div class="pt-5 border-t border-gray-100 dark:border-gray-700/50 mt-auto">
                   <button
-                    class="border border-gray-200 w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 dark:bg-[#253439] hover:bg-[#030213] text-gray-700 dark:text-gray-300 hover:text-white rounded-xl transition-all duration-300 group/btn text-sm font-medium">
+                    class="border shadow-sm border-gray-300  w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 dark:bg-[#253439] hover:bg-[#030213] text-gray-700 dark:text-gray-300 hover:text-white rounded-xl transition-all duration-300 group/btn text-sm font-medium">
                     <span>Administrar</span>
                     <Icon name="heroicons:arrow-right-20-solid"
                       class="w-5 h-5 transform transition-transform duration-300 group-hover/btn:translate-x-1" />
@@ -131,7 +131,7 @@
                 <!-- Footer -->
                 <div class="pt-5 border-t border-gray-100 dark:border-gray-700/50 mt-auto">
                   <button
-                    class="border border-gray-200 w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 dark:bg-[#253439] hover:bg-[#030213] text-gray-700 dark:text-gray-300 hover:text-white rounded-xl transition-all duration-300 group/btn text-sm font-medium">
+                    class="border shadow-sm border-gray-300  w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 dark:bg-[#253439] hover:bg-[#030213] text-gray-700 dark:text-gray-300 hover:text-white rounded-xl transition-all duration-300 group/btn text-sm font-medium">
                     <span>Gestionar</span>
                     <Icon name="heroicons:arrow-right-20-solid"
                       class="w-5 h-5 transform transition-transform duration-300 group-hover/btn:translate-x-1" />
